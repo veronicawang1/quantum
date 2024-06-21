@@ -7,50 +7,14 @@ from qutip import *
 from sympy import *
 from coupling import *
 from classes import *
+from hamiltonian import *
+
+####################
+# CONSTANTS
 initial_time = 0
 end_time = 10
 numberOfSine = 5
-
-rows = ["111", "110", "101", "100", "011", "010", "001", "000"]
-columns = ["111", "110", "101", "100", "011", "010", "001", "000"]
-matrix = [["" for _ in range(8)] for _ in range(8)]
-
-# Sine curves used are constant each time you run code
-curve1 = JValue(numberOfSine)
-curve2 = JValue(numberOfSine)
-curve3 = JValue(numberOfSine)
-j12 = curve1.showValue(initial_time)
-j13 = curve2.showValue(initial_time)
-j23 = curve3.showValue(initial_time)
-
-hamMatrix = []
-def calculate_ham_matrix(t):
-    matrix = []
-    j12 = curve1.showValue(t)
-    j13 = curve2.showValue(t)
-    j23 = curve3.showValue(t)
-    for i in range(8):
-        tempArr = []
-        state1 = rows[i]
-        for j in range(8):
-            tempVal = 0
-            state2 = columns[j]
-            # change number of sig figs?
-            tempVal = round(
-                    ((j12 * ((-1) ** compareState(state1[0], state2[1]))) + 
-                    (j13 * ((-1) ** compareState(state1[0], state2[2]))) + 
-                    (j23 * ((-1) ** compareState(state1[1], state2[2])))), 3)
-            tempArr.append(tempVal)
-            #print(f"{j12} * (-1 ** {compareState(state1[0], state2[1])})")
-            #print((-1) ** compareState(state1[0], state2[1]))
-        matrix.append(tempArr)
-    return matrix
-
-
-def view_arr(m):
-    for i in range(8):
-        print(str(m[i]))
-
+h = 10^-3
 
 for i in range(8):
     for j in range(8):
@@ -78,29 +42,51 @@ def ground_state(t):
 
 # FINDING LAMBDA
 # Numerical differentiation using finite differences
-def differentiate(vector, time, h=1e-5):
-    return (vector(time + h) - vector(time - h)) / (2 * h)
+def differentiate(vector, time):
+    return (vector(time + h) - vector(time)) / (h)
 
-# Compute the numerical derivative of the ground state eigenvector
-time_value = 1.0
-ground_state_at_time = ground_state(time_value)
-ground_state_derivative = differentiate(ground_state, time_value)
+
+#abs value too and check size of h
+
+def normalize(vector):
+    magnitude = np.linalg.norm(vector)
+    if magnitude == 0:
+        raise ValueError("Cannot normalize a zero vector")
+    return vector / magnitude
+
+
+'''
+print("Original vector:", ground_state_derivative)
+print("Normalized vector:", normalized_ground)
+#should equal 1
+print("Magnitude of normalized vector:", np.linalg.norm(normalized_ground))
 
 # Print the results
 print("Ground state eigenvector at time =", time_value, ":\n", ground_state_at_time)
 print("Derivative of the ground state eigenvector at time =", time_value, ":\n", ground_state_derivative)
+'''
 
 # Integrate the derivative using the trapezoidal rule
-def integrate_derivative(A, B, num_points=1000):
-    t_values = np.linspace(A, B, num_points)
-    dt = (B - A) / (num_points - 1)
+def integrate_derivative(A, B):
+    t_values = np.linspace(A, B, int(1/h))
+    dt = (B - A) / (int(1/h) - 1)
 
     derivatives = np.array([differentiate(ground_state, t) for t in t_values])
-    
-    # Trapezoidal integration
+
+    for t in t_values:
+        print(ground_state(t))
+
+    # Integration without norming, a check
+    """
     integral = np.zeros(derivatives.shape[1])
-    for i in range(1, num_points):
-        integral += (derivatives[i] + derivatives[i-1]) * dt / 2   
+    for i in range(1, int(1/h)):
+        integral += (derivatives[i]) * dt  
+    return integral
+    """
+
+    integral = 0
+    for i in range(1, int(1/h)):
+        integral += (normalize(derivatives[i])) * dt  
     return integral
 
 
@@ -109,7 +95,9 @@ integrated_result = integrate_derivative(initial_time, end_time)
 
 # Print the results
 print("Integrated result from time", initial_time, "to", end_time, ":\n", integrated_result)
+true_result = np.subtract(ground_state(end_time), ground_state(initial_time))
 
+print(f"The true result should be \n{true_result}")
 ##############################
 #PLOTTING
 a = JValue(numberOfSine)
@@ -119,5 +107,11 @@ a = JValue(numberOfSine)
 x = np.linspace(0, 2*math.pi, 200)
 y = ([a.showValue(x_value) for x_value in x])
 
-#plt.plot(x, y)
-#plt.show()
+x1 = np.linspace(initial_time, end_time, 100)
+y1 = ([ground_state(t) for t in x1])
+
+y2 = ([integrate_derivative(0, t) for t in x1])
+# plt.plot(x, y)
+#plt.plot(x1, y1)
+plt.plot(x1, y2)
+plt.show()
