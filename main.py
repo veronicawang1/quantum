@@ -18,7 +18,6 @@ hamMatrix = calculate_ham_matrix(initial_time)
 hamMatrixNp = np.array(hamMatrix)
 
 
-# Compute ground state eigenvector
 def ground_state(t):
     eigenvalues, eigenvectors = np.linalg.eigh(calculate_ham_matrix(t))
     # Form the diagonal matrix from the eigenvalues
@@ -30,11 +29,12 @@ def ground_state(t):
     # A_diag = P @ diagonalMatrix @ P_inv
     min_index = np.argmin(eigenvalues)
     return eigenvectors[:, min_index]
+    #return np.array([1*t, 2*t, 3*t, 4*t, 5*t, 6*t, 7*t, 8*t])
 
 # FINDING LAMBDA
 # Numerical differentiation using finite differences
-def differentiate(vector, time):
-    return (vector(time + h) - vector(time)) / (h)
+def differentiate(time):
+    return np.divide(np.subtract(ground_state(time + h), ground_state(time)), [h])
 
 
 #abs value too and check size of h
@@ -56,11 +56,37 @@ print("Magnitude of normalized vector:", np.linalg.norm(normalized_ground))
 print("Ground state eigenvector at time =", time_value, ":\n", ground_state_at_time)
 print("Derivative of the ground state eigenvector at time =", time_value, ":\n", ground_state_derivative)
 '''
+def integralof(values, A, B):
+    # Generate an array of x values from A to B
+    # x = np.linspace(A, B)
+    # Compute the trapezoidal sum using numpy's trapz function
+    return np.trapz(values)
 
-# Integrate the derivative using the trapezoidal rule
 def integrate_derivative(start_time, end_time):
-    t_values = np.linspace(start_time, end_time, int(1/h))
-    dt = (end_time - start_time) / (int(1/h) - 1)
+    # t_values = np.linspace(start_time, end_time, h2)
+    t_values = np.linspace(start_time, end_time, h2)
+
+    derivatives = np.array([differentiate(t) for t in t_values])
+    #print(f"derivatives: {derivatives}")
+    dt = (end_time - start_time) / (h2 - 1)
+    # Initialize an empty list to hold the integrals
+    integral = []
+    
+    # Iterate over each column
+    for j in range(8):
+        # Extract the j-th column
+        column = derivatives[:, j]
+        #print(f"column: {column}")
+        # Compute the integral for the j-th column using the specified A and B
+        integral.append(np.sum(column, 0, dtype = np.float32) * dt)
+        #print(f"integral: {integral}")
+    
+    return integral
+'''
+# Integrate the derivative using riemann
+def integrate_derivative(start_time, end_time):
+    t_values = np.linspace(start_time, end_time, h2)
+    dt = (end_time - start_time) / (h2 - 1)
 
     derivatives = np.array([differentiate(ground_state, t) for t in t_values])
 
@@ -68,18 +94,18 @@ def integrate_derivative(start_time, end_time):
         print(ground_state(t))
 
     # Integration without norming, a check
-    """
+
     integral = np.zeros(derivatives.shape[1])
-    for i in range(1, int(1/h)):
+    for i in range(1, h2):
         integral += (derivatives[i]) * dt  
     return integral
-    """
-
+    
     integral = 0
-    for i in range(1, int(1/h)):
+    for i in range(1, h2):
         integral += (normalize(derivatives[i])) * dt  
     return integral
 
+'''
 
 # Perform the integration
 integrated_result = integrate_derivative(initial_time, end_time)
@@ -104,5 +130,5 @@ y1 = ([ground_state(t) for t in x1])
 y2 = ([integrate_derivative(0, t) for t in x1])
 # plt.plot(x, y)
 #plt.plot(x1, y1)
-plt.plot(x1, y2)
-plt.show()
+# plt.plot(x1, y2)
+# plt.show()
