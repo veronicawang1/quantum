@@ -7,9 +7,7 @@ from qutip import *
 from sympy import *
 from coupling import *
 from classes import *
-from main import initial_time
-from main import end_time
-from main import numberOfSine
+from constants import *
 
 rows = ["111", "110", "101", "100", "011", "010", "001", "000"]
 columns = ["111", "110", "101", "100", "011", "010", "001", "000"]

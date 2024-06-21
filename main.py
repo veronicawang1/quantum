@@ -8,17 +8,8 @@ from sympy import *
 from coupling import *
 from classes import *
 from hamiltonian import *
+from constants import *
 
-####################
-# CONSTANTS
-initial_time = 0
-end_time = 10
-numberOfSine = 5
-h = 10^-3
-
-for i in range(8):
-    for j in range(8):
-        matrix[i][j] = coupleState(rows[i], columns[j])
 
 ###########################
 ### REMEMBER TO CONVERT MATRIX INTO NUMPY MATRIX EVERY TIME YOU CHANGE IT
@@ -67,9 +58,9 @@ print("Derivative of the ground state eigenvector at time =", time_value, ":\n",
 '''
 
 # Integrate the derivative using the trapezoidal rule
-def integrate_derivative(A, B):
-    t_values = np.linspace(A, B, int(1/h))
-    dt = (B - A) / (int(1/h) - 1)
+def integrate_derivative(start_time, end_time):
+    t_values = np.linspace(start_time, end_time, int(1/h))
+    dt = (end_time - start_time) / (int(1/h) - 1)
 
     derivatives = np.array([differentiate(ground_state, t) for t in t_values])
 
