@@ -38,19 +38,30 @@ def differentiate(time):
 
 
 #abs value too and check size of h
+#choose phase such that everything is real 
+# normalize the eigevector, check to make sure numpy does this
+# derivative is insensitive to h psi adds instead of subtract, leads to giant derivative, make a check against this
 
-def normalize(vector):
+def norm(vector):
     magnitude = np.linalg.norm(vector)
     if magnitude == 0:
-        raise ValueError("Cannot normalize a zero vector")
-    return vector / magnitude
+        raise ValueError("Cannot norm a zero vector")
+    return np.divide(vector, [magnitude])
 
+def normalize(arr):
+    norm_arr = []
+    diff = 1
+    diff_arr = np.max(arr) - np.min(arr)    
+    for i in arr:
+        temp = (((i - np.min(arr))*diff)/diff_arr)
+        norm_arr.append(temp)
+    return np.array(norm_arr)
 
 '''
 print("Original vector:", ground_state_derivative)
-print("Normalized vector:", normalized_ground)
+print("Vector norm:", norm_ground)
 #should equal 1
-print("Magnitude of normalized vector:", np.linalg.norm(normalized_ground))
+print("Magnitude of norm:", np.linalg.norm(norm_ground))
 
 # Print the results
 print("Ground state eigenvector at time =", time_value, ":\n", ground_state_at_time)
@@ -82,32 +93,27 @@ def integrate_derivative(start_time, end_time):
         #print(f"integral: {integral}")
     
     return integral
-'''
-# Integrate the derivative using riemann
-def integrate_derivative(start_time, end_time):
+
+path_length = 0
+def integrate_norm(start_time, end_time):
+    path_length = 0
     t_values = np.linspace(start_time, end_time, h2)
     dt = (end_time - start_time) / (h2 - 1)
 
-    derivatives = np.array([differentiate(ground_state, t) for t in t_values])
-
-    for t in t_values:
-        print(ground_state(t))
+    derivatives = np.array([norm(differentiate(t)) for t in t_values])
+    # print(derivatives)
 
     # Integration without norming, a check
 
     integral = np.zeros(derivatives.shape[1])
-    for i in range(1, h2):
-        integral += (derivatives[i]) * dt  
-    return integral
-    
-    integral = 0
-    for i in range(1, h2):
-        integral += (normalize(derivatives[i])) * dt  
-    return integral
+    for i in range(h2):
+        path_length += (derivatives[i]) * dt  
+    return path_length
 
-'''
+path_length = integrate_norm(1, 10)
 
 # Perform the integration
+
 integrated_result = integrate_derivative(initial_time, end_time)
 
 # Print the results
@@ -115,6 +121,10 @@ print("Integrated result from time", initial_time, "to", end_time, ":\n", integr
 true_result = np.subtract(ground_state(end_time), ground_state(initial_time))
 
 print(f"The true result should be \n{true_result}")
+
+arr = [1, 2, 3]
+print(normalize(arr))
+
 ##############################
 #PLOTTING
 a = JValue(numberOfSine)
