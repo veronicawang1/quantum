@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 (* just storing my mathematica code here in case it gets lost and for documentation*)
+=======
+>>>>>>> 17bd6fc2215c3fd8df7e29d1ce242fad291c4e9c
 Needs["NumericalCalculus`"]
 
 (*Global Constants*)
