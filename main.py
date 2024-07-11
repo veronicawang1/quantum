@@ -17,6 +17,21 @@ from constants import *
 hamMatrix = calculate_ham_matrix(initial_time)
 hamMatrixNp = np.array(hamMatrix)
 
+def norm(vector):
+    magnitude = np.linalg.norm(vector)
+    if magnitude == 0:
+        raise ValueError("Cannot norm a zero vector")
+    return np.divide(vector, [magnitude])
+
+# argument is numpy array
+def normalize(arr):
+    norm_arr = []
+    diff = 1
+    diff_arr = np.max(arr) - np.min(arr)    
+    for i in arr:
+        temp = (((i - np.min(arr))*diff)/diff_arr)
+        norm_arr.append(temp)
+    return np.array(norm_arr)
 
 def ground_state(t):
     eigenvalues, eigenvectors = np.linalg.eigh(calculate_ham_matrix(t))
@@ -28,6 +43,7 @@ def ground_state(t):
     # P_inv = np.linalg.inv(P)
     # A_diag = P @ diagonalMatrix @ P_inv
     min_index = np.argmin(eigenvalues)
+    # normalize the eigenvectors
     return eigenvectors[:, min_index]
     #return np.array([1*t, 2*t, 3*t, 4*t, 5*t, 6*t, 7*t, 8*t])
 
@@ -38,24 +54,10 @@ def differentiate(time):
 
 
 #abs value too and check size of h
-#choose phase such that everything is real 
+# choose phase such that everything is real 
 # normalize the eigevector, check to make sure numpy does this
 # derivative is insensitive to h psi adds instead of subtract, leads to giant derivative, make a check against this
 
-def norm(vector):
-    magnitude = np.linalg.norm(vector)
-    if magnitude == 0:
-        raise ValueError("Cannot norm a zero vector")
-    return np.divide(vector, [magnitude])
-
-def normalize(arr):
-    norm_arr = []
-    diff = 1
-    diff_arr = np.max(arr) - np.min(arr)    
-    for i in arr:
-        temp = (((i - np.min(arr))*diff)/diff_arr)
-        norm_arr.append(temp)
-    return np.array(norm_arr)
 
 '''
 print("Original vector:", ground_state_derivative)
