@@ -1,17 +1,16 @@
-(* just storing my mathematica code here in case it gets lost and for documentation*)
 Needs["NumericalCalculus`"]
 
 (*Global Constants*)
 
 initialTime = 0;
-endTime = 1;
 totalTime = endTime - initialTime;
 dimension = 4;
 t1 = 1;
 t2 = 1/Sqrt[2];
 n = 1000;
 dt = 0.01;
-temp = 1;
+temp = 80;
+endTime = 1;
 
 generateGOEMatrix[n_Integer] := 
  Module[{matrix}, 
@@ -22,7 +21,7 @@ generateGOEMatrix[n_Integer] :=
     2;(*Ensure the matrix is symmetric*)matrix]
 
 H[t_] := 
- Tscale[1]  ((Sin[t/t1] 2.1 + Sin[t/t2])*
+ Tscale[t]  ((Sin[t/t1] 2.1 + Sin[t/t2])*
      Hinitial + (Cos[t/t1] 2.7 + Cos[t/t2])*Hend)
 
 previousEigenvector = None;
@@ -89,18 +88,9 @@ All,i]]}],PlotRange->All,PlotLabel->"Excited State Element \
 "<>ToString[i],AxesLabel->{"t","Element \
 "<>ToString[i]}],{i,Length[firstExcitedStates[[1]]]}];
 
-GraphicsGrid[Partition[plots,2]] *)
+GraphicsGrid[Partition[plots,2]]
 
-
-
-
-
-
-
-
-
-
-
+*)
 
 gap[t_, n_] := 
  Module[{eigenvalues, sortedEigenvalues, smallestEigenvalue, 
@@ -111,26 +101,20 @@ gap[t_, n_] :=
   difference = nEigenvalue - smallestEigenvalue;
   difference]
 
-Tscale[t_] := 100
+
+
+
+
+
+Tscale[t_] := temp
+
+
+
+
+
+
 
 omega[n_] := NIntegrate[gap[t, n]/Tscale[t], {t, initialTime, endTime}]
-
-(*If you don't make it eigenvalues[t] the lines for each eigenvalue \
-are individually colored*)
-eigenvalsFunction[t_] := Eigenvalues[H[t]]
-
-
-groundStateElementsPlots = 
-  Table[Plot[groundState[t][[i]], {t, initialTime, endTime}, 
-    PlotRange -> All, 
-    PlotLabel -> "Ground State Element " <> ToString[i], 
-    AxesLabel -> {"t", "Element " <> ToString[i]}], {i, 1, dimension}];
-Column[groundStateElementsPlots]
-
-Plot[Evaluate[Table[eigenvalsFunction[t][[i]], {i, dimension}]], {t, 
-  initialTime, endTime}, PlotRange -> All, PlotLabel -> "Eigenvalues",
-  AxesLabel -> {"t", "E(t)"}]
-
 
 
 derivativeGroundState[t_?NumericQ, 
@@ -139,12 +123,46 @@ derivativeGroundState[t_?NumericQ,
 
 normDerivativeGroundState[t_] := Norm[derivativeGroundState[t]]
 
-Hinitial = {{-1.02148, -0.789689, 0.320023, -0.0624626}, {-0.789689, 
-   0.401399, -0.786096, 0.419956}, {0.320023, -0.786096, 
-   0.661477, -0.49586}, {-0.0624626, 0.419956, -0.49586, -1.62448}}
-Hend = {{-0.0060264, 0.216801, 0.315887, -0.425447}, {0.216801, 
-   0.596056, 0.843684, 0.106698}, {0.315887, 0.843684, 0.464097, 
-   0.166278}, {-0.425447, 0.106698, 0.166278, -0.0615025}}
+Hinitial = {{-0.978011, 
+   0.442537, -1.13173, -0.885678}, {0.442537, -0.888185, -0.238622, 
+   0.40392}, {-1.13173, -0.238622, 1.04262, -0.563516}, {-0.885678, 
+   0.40392, -0.563516, 0.552724}}
+
+Hend = {{0.0482198, 0.593326, -0.64427, 
+   0.680961}, {0.593326, -0.00816359, -0.186093, -0.463839}, \
+{-0.64427, -0.186093, 0.800334, 0.700095}, {0.680961, -0.463839, 
+   0.700095, 0.545787}}
+
+
+
+
+(*If you don't make it eigenvalues[t] the lines for each eigenvalue \
+are individually colored*)
+eigenvalsFunction[t_] := Eigenvalues[H[t]]
+
+
+(*groundStateElementsPlots=Table[Plot[groundState[t][[i]],{t,\
+initialTime,endTime},PlotRange->All,PlotLabel->"Ground State Element \
+"<>ToString[i],AxesLabel->{"t","Element \
+"<>ToString[i]}],{i,1,dimension}];
+Column[groundStateElementsPlots]*)
+
+
+
+
+
+
+
+
+(*Plot[Evaluate[Table[eigenvalsFunction[t][[i]],{i,dimension}]],{t,\
+initialTime,endTime},PlotRange->All,PlotLabel->"Eigenvalues",\
+AxesLabel->{"t","E(t)"}] *)
+
+
+
+
+
+
 
 LFunction[t_] := 
  NIntegrate[
@@ -168,8 +186,9 @@ schrodingerTiming =
      psi, {t, initialTime, endTime}];
    psiFunction = psi /. First[sol];];
 
-Print["Omega = ", omega[1]];
-Print["Time for omega: ", AbsoluteTiming[omega[1]], " seconds"];
+(*
+Print["Omega = ",omega[1]];
+Print["Time for omega: ",AbsoluteTiming[omega[1]]," seconds"];
 Print["Ground state at end time: ", groundState[endTime]];
 Print["State at end time: ", state[endTime, 1]]
 H[endTime]
@@ -177,33 +196,43 @@ Print[H'[endTime]];
 Print["TScale: ", Tscale[endTime]];
 Print["E value: ", E^(I*Tscale[endTime]*omega[1])]; 
 
+Print["Sum: \
+",Sum[Abs[N[E^(I*Tscale[endTime]*omega[i])*(state[endTime,i].(H'[\
+endTime]/Tscale[endTime]).groundState[endTime]/(gap[endTime,i]/Tscale[\
+endTime])^2)]-N[state[0,i].(H'[0]/Tscale[0]).groundState[0]/(gap[0,i]/\
+Tscale[0])^2]]^2,{i,1,dimension-1,1}]];
 
-
-
-
-Print["Sum: ", 
-  Sum[Abs[N[
-       E^(I*Tscale[endTime]*
-           omega[i])*(state[endTime, 
-            i] . (H'[endTime]/Tscale[endTime]) . 
-           groundState[
-            endTime]/(gap[endTime, i]/Tscale[endTime])^2)] - 
-      N[state[0, i] . (H'[0]/Tscale[0]) . 
-         groundState[0]/(gap[0, i]/Tscale[0])^2]]^2, {i, 1, 
-    dimension - 1, 1}]];
-
-Print["Each: ", 
-  Table[Abs[
-     N[E^(I*Tscale[0]*omega[i])*(state[0, i] . (H'[0]/Tscale[0]) . 
-           groundState[0]/(gap[0, i]/Tscale[0])^2)] - 
-      N[state[0, i] . (H'[0]/Tscale[0]) . 
-         groundState[0]/(gap[0, i]/Tscale[0])^2]]^2, {i, 1, 
-    dimension - 1, 1}]];
+Print["Each: \
+",Table[Abs[N[E^(I*Tscale[0]*omega[i])*(state[0,i].(H'[0]/Tscale[0]).\
+groundState[0]/(gap[0,i]/Tscale[0])^2)]-N[state[0,i].(H'[0]/Tscale[0])\
+.groundState[0]/(gap[0,i]/Tscale[0])^2]]^2,{i,1,dimension-1,1}]];
 
 generateGroundStates[dt][[1]]
 generateGroundStates[dt][[-1]]
 generateExcitedStates[dt, 1][[1]]
 generateExcitedStates[dt, 1][[-1]]
+*)
+
+(*Plot[gap[t,1],{t,initialTime,endTime},PlotRange->All,PlotLabel->\
+"Eigenvalues",AxesLabel->{"t","E(t)"}] *)
+
+
+psiFunction = psi /. First[sol];
+(*
+Plot[Abs[groundState[t].psiFunction[t]]^2/(Conjugate[psiFunction[t]].\
+psiFunction[t]), {t, initialTime, endTime},PlotRange->All]
+Plot[(Conjugate[psiFunction[t]].psiFunction[t]), {t, initialTime, \
+endTime},PlotRange->All]
+*)
+
+
+
+
+Print["Error:"]
+Print[Sqrt[
+   Abs[1 - Abs[groundState[endTime] . psiFunction[endTime]]^2/
+      Norm[psiFunction[endTime]]^2]]];
+
 ClearAll[estimatedError];
 estimatedError[t_] := 
  N[1/Tscale[t]*
@@ -214,22 +243,11 @@ estimatedError[t_] :=
              generateGroundStates[dt][[-1]]/(gap[endTime, i]/
                Tscale[endTime])^2)] - 
         N[generateExcitedStates[dt, i][[1]] . (H'[0]/Tscale[0]) . 
-           generateGroundStates[dt][[
-            1]]/(gap[0, i]/Tscale[0])^2]]^2, {i, 1, dimension - 1, 
-      1}]]]
+           generateGroundStates[dt][[1]]/(gap[0, i]/
+             Tscale[0])^2]]^2, {i, 1, dimension - 1, 1}]]]
 
-Print["Estimated Error: ", estimatedError[0]];
-Print["Ground State at 0: ", groundState[0]];
 
-Print["Time for Estimated Error: ", AbsoluteTiming[estimatedError]];
-Print["Time for schrodinger: ", schrodingerTiming[[1]], " seconds"];
-psiFunction = psi /. First[sol];
-Print["Error:"]
-Print[1 - Abs[groundState[endTime] . psiFunction[endTime]]^2];
-Print[Sqrt[
-   Abs[1 - Abs[
-        groundState[endTime] . psiFunction[endTime]]^2]/(Conjugate[
-       psiFunction[endTime]] . psiFunction[endTime])]];
+Print["Time, estimated error:", AbsoluteTiming[estimatedError[0]]];
 
 
 Plot[gap[t, 2], {t, initialTime, endTime}, PlotRange -> All, 

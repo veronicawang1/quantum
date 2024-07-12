@@ -1,0 +1,28 @@
+lengths = {{0, 0}, {0.25, 0.179528}, {0.5, 0.366717}, {1, 
+    0.722842}, {10, 7.12549}, {25, 18.5316}, {50, 37.7878}, {75, 
+    56.209}, {100, 74.8884}, {150, 112.41}, {200, 150.238}, {250, 
+    187.535}, {400, 299.604}};
+
+ListPlot[lengths, PlotStyle -> {Red, PointSize[Medium]}, 
+ AxesLabel -> {"Time", "Length"}, PlotLabel -> "Time vs. Length", 
+ GridLines -> Automatic, PlotRange -> All]
+ 
+numericalError = {{0, 0}, {0.25, 0.00294772}, {0.5, 
+    0.00542222}, {0.75, 0.00761904}, {1, 0.00944709}, {5, 
+    0.0214343}, {10, 0.0250605}, {25, 0.0395264}, {50, 
+    0.0574777}, {75, 0.0692147}, {100, 0.0796737}, {150, 
+    0.0980333}, {200, 0.112956}, {250, 0.124205}, {300, 
+    0.136723}, {400, 0.15781}};
+
+estimatedError = {{0, 0}, {0.25, 0.00193576}, {0.5, 
+    0.000928755}, {0.75, 0.00158943}, {1, 0.00124293}, {5, 
+    0.00329686}, {10, 0.00720933}, {25, 0.00167584}, {50, 
+    0.00178187}, {75, 0.00163338}, {100, 0.00195777}, {150, 
+    0.00336228}, {200, 0.00220812}, {250, 0.0155635}, {300, 
+    0.00240538}, {400, 0.00422287}};
+
+ListPlot[{numericalError, estimatedError}, PlotStyle -> {Red, Blue}, 
+ PlotMarkers -> Automatic, AxesLabel -> {"Time", "Error"}, 
+ PlotLabel -> "Time vs Numerical and Estimated Error", 
+ GridLines -> Automatic, PlotRange -> All, 
+ PlotLegends -> {"Numerical Error", "Estimated Error"}]
