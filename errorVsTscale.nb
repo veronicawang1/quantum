@@ -1,0 +1,111 @@
+Needs["NumericalCalculus`"]
+
+initialTime = 0;
+endTime = 10;
+totalTime = endTime - initialTime;
+dimension = 4;
+t1 = 1;
+t2 = 1/Sqrt[2];
+n = 1000;
+dt = 0.01;
+
+Tscale[T_] := T
+
+generateGOEMatrix[n_Integer] := 
+ Module[{matrix}, 
+  matrix = 
+   Table[If[i == j, RandomVariate[NormalDistribution[0, 1]], 
+     RandomVariate[NormalDistribution[0, 1/Sqrt[2]]]], {i, n}, {j, n}];
+  matrix = (matrix + Transpose[matrix])/2; matrix]
+
+H[t_, T_] := 
+ Tscale[T]*((Sin[t/t1]*2.1 + Sin[t/t2])*
+     Hinitial + (Cos[t/t1]*2.7 + Cos[t/t2])*Hend)
+
+groundState[t_, T_] := 
+ Module[{eigenvalues, eigenvectors, 
+   minIndex}, {eigenvalues, eigenvectors} = Eigensystem[H[t, T]];
+  minIndex = First[Ordering[Re[eigenvalues], 1]];
+  Normalize[Re[eigenvectors[[minIndex]]]]]
+
+generateGroundStates[dt_, T_] := 
+ Module[{t, states, currentState, nextState, dotProduct}, 
+  states = {groundState[initialTime, T]};
+  currentState = groundState[initialTime, T];
+  For[t = initialTime, t < endTime, t += dt, 
+   nextState = groundState[t + dt, T];
+   dotProduct = Re[Dot[currentState, nextState]];
+   If[dotProduct >= 0, AppendTo[states, nextState], 
+    AppendTo[states, -nextState]];
+   currentState = Last[states];];
+  states]
+
+state[t_, n_, T_] := 
+ Module[{eigenvalues, eigenvectors, 
+   index}, {eigenvalues, eigenvectors} = Eigensystem[H[t, T]];
+  index = Ordering[Re[eigenvalues], n + 1][[n + 1]];
+  Normalize[Re[eigenvectors[[index]]]]]
+
+generateExcitedStates[dt_, n_, T_] := 
+ Module[{t, states, currentState, nextState, dotProduct}, 
+  states = {state[initialTime, n, T]};
+  currentState = state[initialTime, n, T];
+  For[t = initialTime, t < endTime, t += dt, 
+   nextState = state[t + dt, n, T];
+   dotProduct = Re[Dot[currentState, nextState]];
+   If[dotProduct >= 0, AppendTo[states, nextState], 
+    AppendTo[states, -nextState]];
+   currentState = Last[states];];
+  states]
+
+gap[t_, n_, T_] := 
+ Module[{eigenvalues, sortedEigenvalues, smallestEigenvalue, 
+   nEigenvalue, difference}, eigenvalues = Re[Eigenvalues[H[t, T]]];
+  sortedEigenvalues = Sort[eigenvalues];
+  smallestEigenvalue = sortedEigenvalues[[1]];
+  nEigenvalue = sortedEigenvalues[[n + 1]];
+  difference = nEigenvalue - smallestEigenvalue;
+  difference]
+
+omega[n_, T_] := 
+ NIntegrate[gap[t, n, T]/Tscale[T], {t, initialTime, endTime}]
+
+derivativeGroundState[t_?NumericQ, T_, 
+  h_ : 0.01] := (groundState[t + h, T] - 
+    groundState[t - h, 
+      T]*(groundState[t + h, T] . groundState[t - h, T]))/(2*h)
+
+normDerivativeGroundState[t_, T_] := Norm[derivativeGroundState[t, T]]
+
+Hinitial = {{-0.978011, 
+   0.442537, -1.13173, -0.885678}, {0.442537, -0.888185, -0.238622, 
+   0.40392}, {-1.13173, -0.238622, 1.04262, -0.563516}, {-0.885678, 
+   0.40392, -0.563516, 0.552724}}
+
+Hend = {{0.0482198, 0.593326, -0.64427, 
+   0.680961}, {0.593326, -0.00816359, -0.186093, -0.463839}, \
+{-0.64427, -0.186093, 0.800334, 0.700095}, {0.680961, -0.463839, 
+   0.700095, 0.545787}}
+
+calculateNumericalError[T_] := 
+ Module[{schrodingerEqu, initialCondition, sol, psiFunction, 
+   numericalError}, 
+  schrodingerEqu = I D[psi[t], t] == H[t, T] . psi[t];
+  initialCondition = psi[initialTime] == groundState[initialTime, T];
+  sol = NDSolve[{schrodingerEqu, initialCondition}, 
+    psi, {t, initialTime, endTime}];
+  psiFunction = psi /. First[sol];
+  numericalError = 
+   Sqrt[Abs[
+     1 - Abs[groundState[endTime, T] . psiFunction[endTime]]^2/
+       Norm[psiFunction[endTime]]^2]];
+  numericalError]
+
+Tscales = Range[1, 300];
+numericalErrors = Table[calculateNumericalError[T], {T, Tscales}];
+
+ListLinePlot[Transpose[{Tscales, numericalErrors}], 
+ PlotRange -> {0, 0.02}, 
+ Epilog -> {Red, Dashed, Line[{{1, 0.01}, {300, 0.01}}]}, 
+ PlotLabel -> "Numerical Error vs Tscale", 
+ AxesLabel -> {"Tscale", "Numerical Error"}]

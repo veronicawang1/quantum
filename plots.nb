@@ -26,3 +26,47 @@ ListPlot[{numericalError, estimatedError}, PlotStyle -> {Red, Blue},
  PlotLabel -> "Time vs Numerical and Estimated Error", 
  GridLines -> Automatic, PlotRange -> All, 
  PlotLegends -> {"Numerical Error", "Estimated Error"}]
+
+
+data = {{0.25, 0.743221, 0.679376}, {0.5, 0.944702, 0.33125}, {0.75, 
+    0.956842, 0.275258}, {1, 0.714626, 0.139382}, {5, 0.453195, 
+    0.0202892}, {10, 0.489112, 0.0159122}, {15, 0.178445, 
+    0.0123229}, {20, 0.0564877, 0.0081473}, {25, 0.02709, 
+    0.00524032}, {30, 0.0125538, 0.00430966}, {35, 0.00476088, 
+    0.00509585}, {40, 0.00420211, 0.00530321}, {45, 0.00492376, 
+    0.00477037}, {50, 0.00393889, 0.00352544}, {75, 0.00238335, 
+    0.00219435}, {100, 0.00174119, 0.00178187}, {125, 0.00167612, 
+    0.00171166}, {150, 0.0011642, 0.00116305}, {175, 0.000549537, 
+    0.000586142}, {200, 0.000569245, 0.000599354}, {250, 0.000439756, 
+    0.00041137}, {300, 0.000697584, 0.000696216}, {350, 0.000439762, 
+    0.00044649}, {400, 0.000385479, 0.000385278}};
+
+timescale = data[[All, 1]];
+numericalError = data[[All, 2]];
+estimatedError = data[[All, 3]];
+
+ListLinePlot[{Transpose[{timescale, numericalError}], 
+  Transpose[{timescale, estimatedError}]}, 
+ PlotLegends -> {"Numerical Error", "Estimated Error"}, 
+ PlotStyle -> {Red, Blue}, AxesLabel -> {"Timescale", "Error"}, 
+ PlotLabel -> "Numerical Error vs Estimated Error", 
+ GridLines -> Automatic, ImageSize -> Large]
+
+
+ data = {{100, 0.00174119, 0.00178187}, {125, 0.00167612, 
+   0.00171166}, {150, 0.0011642, 0.00116305}, {175, 0.000549537, 
+   0.000586142}, {200, 0.000569245, 0.000599354}, {250, 0.000439756, 
+   0.00041137}, {300, 0.000697584, 0.000696216}, {350, 0.000439762, 
+   0.00044649}, {400, 0.000385479, 0.000385278}, {450, 0.000191735, 
+   0.000193019}, {500, 0.000356746, 0.000352978}}
+
+timescale = data[[All, 1]];
+numericalError = data[[All, 2]];
+estimatedError = data[[All, 3]];
+
+ListLinePlot[{Transpose[{timescale, numericalError}], 
+  Transpose[{timescale, estimatedError}]}, 
+ PlotLegends -> {"Numerical Error", "Estimated Error"}, 
+ PlotStyle -> {Red, Blue}, AxesLabel -> {"Timescale", "Error"}, 
+ PlotLabel -> "Numerical Error vs Estimated Error", 
+ GridLines -> Automatic, ImageSize -> Large]

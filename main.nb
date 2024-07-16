@@ -24,8 +24,6 @@ H[t_] :=
  Tscale[t]  ((Sin[t/t1] 2.1 + Sin[t/t2])*
      Hinitial + (Cos[t/t1] 2.7 + Cos[t/t2])*Hend)
 
-previousEigenvector = None;
-
 
 
 
